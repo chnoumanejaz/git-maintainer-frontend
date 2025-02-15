@@ -64,3 +64,25 @@ export const gitCredentialsFormSchema = z.object({
 export type gitCredentialsFormSchemaType = z.infer<
   typeof gitCredentialsFormSchema
 >;
+
+// Git commits Form Schema
+export const gitCommitFormSchema = z.object({
+  repo_name: z.string().trim().min(2, {
+    message: 'Please enter the repository name.',
+  }),
+
+  num_commits: z.coerce
+    .number()
+    .min(1, {
+      message: 'Enter the number of commits.',
+    })
+    .max(20, {
+      message: 'Number of commits must be less than 20.',
+    }),
+
+  user_input: z.string().trim().min(8, {
+    message: 'Enter something about what you want to do in repository.',
+  }),
+});
+
+export type gitCommitFormSchemaType = z.infer<typeof gitCommitFormSchema>;

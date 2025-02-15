@@ -42,7 +42,7 @@ const GitCredentialsForm: React.FC = () => {
     <Card className="w-full max-w-md rounded-lg p-2 md:p-8 shadow-md m-3 md:m-0">
       <CardHeader>
         <CardTitle className="md:mb-6 text-lg md:text-2xl font-semibold text-center">
-          Enter your Github Credentials
+          Configure Github Credentials
         </CardTitle>
       </CardHeader>
       <CardContent>
