@@ -49,3 +49,18 @@ export const registerFormSchema = z.object({
     }),
 });
 export type registerFormSchemaType = z.infer<typeof registerFormSchema>;
+
+// Git credentials Form Schema
+export const gitCredentialsFormSchema = z.object({
+  github_username: z.string().trim().min(2, {
+    message: 'Please enter your github username.',
+  }),
+
+  github_token: z.string().trim().min(8, {
+    message: 'Enter a valid github token.',
+  }),
+});
+
+export type gitCredentialsFormSchemaType = z.infer<
+  typeof gitCredentialsFormSchema
+>;

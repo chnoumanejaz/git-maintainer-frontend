@@ -38,7 +38,7 @@ const LoginForm: React.FC = () => {
   return (
     <Card className="w-full max-w-md rounded-lg p-2 md:p-8 shadow-md m-6 md:m-0">
       <CardHeader>
-        <CardTitle className="mb-6 text-2xl font-semibold text-gray-700 text-center">
+        <CardTitle className="mb-6 text-2xl font-semibold text-center">
           Welcome Back
         </CardTitle>
       </CardHeader>
