@@ -14,9 +14,10 @@ export const loginFormSchema = z.object({
     })
     .transform(val => val.replace(/\s+/g, '_')),
 
-  password: z.string().trim().min(8, {
-    message: 'Password must be at least 8 characters.',
-  }),
+  password: z
+    .string()
+    .trim()
+    .min(1, { message: 'Please enter your password.' }),
 });
 export type loginFormSchemaType = z.infer<typeof loginFormSchema>;
 

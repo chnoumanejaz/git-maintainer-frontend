@@ -16,13 +16,22 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { ACCESS_TOKEN, REFRESH_TOKEN } from '@/constants';
+import { formatErrorMessage } from '@/lib/utils';
 import { loginFormSchema, loginFormSchemaType } from '@/schemas/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
+import axios, { AxiosError } from 'axios';
+import Cookies from 'js-cookie';
 import Link from 'next/link';
-import React from 'react';
+import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 const LoginForm: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
   const form = useForm<loginFormSchemaType>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: {
@@ -31,8 +40,34 @@ const LoginForm: React.FC = () => {
     },
   });
 
-  function onSubmit(values: loginFormSchemaType) {
+  async function onSubmit(values: loginFormSchemaType) {
     console.log(values);
+    try {
+      setIsLoading(true);
+      const response = await axios.post(
+        process.env.NEXT_PUBLIC_API_URL + '/login/',
+        values
+      );
+
+      console.log('response', response);
+      Cookies.set(ACCESS_TOKEN, response.data.access, {
+        secure: true,
+      });
+      Cookies.set(REFRESH_TOKEN, response.data.refresh, {
+        secure: true,
+      });
+      toast.success('You have successfully logged in.');
+      router.push('/dashboard');
+    } catch (error) {
+      console.error(error);
+      if (error instanceof AxiosError) {
+        toast.error(formatErrorMessage(error.response?.data));
+      } else {
+        toast.error('An unknown error occurred.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -52,7 +87,11 @@ const LoginForm: React.FC = () => {
                 <FormItem>
                   <FormLabel>Username</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter your username" {...field} />
+                    <Input
+                      placeholder="Enter your username"
+                      {...field}
+                      disabled={isLoading}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -69,13 +108,14 @@ const LoginForm: React.FC = () => {
                       placeholder="Enter your password"
                       type="password"
                       {...field}
+                      disabled={isLoading}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full" disabled={isLoading}>
               Login
             </Button>
           </form>

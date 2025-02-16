@@ -17,13 +17,20 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { formatErrorMessage } from '@/lib/utils';
 import { registerFormSchema, registerFormSchemaType } from '@/schemas/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
+import axios, { AxiosError } from 'axios';
 import Link from 'next/link';
-import React from 'react';
+import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 const RegisterForm: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
   const form = useForm<registerFormSchemaType>({
     resolver: zodResolver(registerFormSchema),
     defaultValues: {
@@ -33,8 +40,29 @@ const RegisterForm: React.FC = () => {
     },
   });
 
-  function onSubmit(values: registerFormSchemaType) {
+  async function onSubmit(values: registerFormSchemaType) {
     console.log(values);
+    try {
+      setIsLoading(true);
+      const response = await axios.post(
+        process.env.NEXT_PUBLIC_API_URL + '/register/',
+        values
+      );
+
+      toast.success(
+        response.data.message + ` Your username is ${values.username}`
+      );
+      router.push('/auth/login');
+    } catch (error) {
+      console.error(error);
+      if (error instanceof AxiosError) {
+        toast.error(formatErrorMessage(error.response?.data));
+      } else {
+        toast.error('An unknown error occurred.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -54,7 +82,11 @@ const RegisterForm: React.FC = () => {
                 <FormItem>
                   <FormLabel>Username</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter your username" {...field} />
+                    <Input
+                      placeholder="Enter your username"
+                      {...field}
+                      disabled={isLoading}
+                    />
                   </FormControl>
                   <FormDescription className="text-xs text-gray-500">
                     No spaces allowed. Spaces will be replaced with underscores.
@@ -74,6 +106,7 @@ const RegisterForm: React.FC = () => {
                       placeholder="Enter your email"
                       type="email"
                       {...field}
+                      disabled={isLoading}
                     />
                   </FormControl>
                   <FormMessage />
@@ -91,6 +124,7 @@ const RegisterForm: React.FC = () => {
                       placeholder="Enter your password"
                       type="password"
                       {...field}
+                      disabled={isLoading}
                     />
                   </FormControl>
                   <FormDescription className="text-xs text-gray-500">
@@ -100,8 +134,8 @@ const RegisterForm: React.FC = () => {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">
-              Create Account
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? 'Creating...' : 'Create Account'}
             </Button>
           </form>
         </Form>

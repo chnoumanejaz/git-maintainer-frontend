@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ACCESS_TOKEN, REFRESH_TOKEN } from './constants';
 
 const protectedRoutes = ['/dashboard'];
-const publicRoutes = ['/auth/login', '/auth/register', '/'];
+const publicRoutes = ['/auth/login', '/auth/register'];
 
 const refreshToken = async () => {
   const refreshToken = (await cookies()).get(REFRESH_TOKEN)?.value;
