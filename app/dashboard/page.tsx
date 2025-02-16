@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { GITHUB_TOKEN, GITHUB_USER } from '@/constants';
 import Cookies from 'js-cookie';
 import { useState } from 'react';
-import CommitActivities from './_components/commit-activities';
+import CommitsHistory from './_components/commits-history';
 import GitCommitForm from './_components/git-commit-form';
 import GitCredentialsForm from './_components/git-credentials-form';
 
@@ -34,7 +34,7 @@ const Dashboard = () => {
               <Button
                 size="sm"
                 onClick={() => setShowAddCommitForm(!showAddCommitForm)}>
-                {showAddCommitForm ? 'Show Activities' : 'Add new commit'}
+                {showAddCommitForm ? 'Show Commits history' : 'Add new commit'}
               </Button>
               <Button
                 size="sm"
@@ -46,7 +46,7 @@ const Dashboard = () => {
             </div>
           </div>
           <div className="flex justify-center mt-4 md:mt-8">
-            {showAddCommitForm ? <GitCommitForm /> : <CommitActivities />}
+            {showAddCommitForm ? <GitCommitForm /> : <CommitsHistory />}
           </div>
         </>
       )}
