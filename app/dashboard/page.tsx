@@ -1,19 +1,28 @@
 'use client';
-import React, { useState } from 'react';
-import GitCredentialsForm from './_components/git-credentials-form';
 import { Button } from '@/components/ui/button';
-import GitCommitForm from './_components/git-commit-form';
+import { GITHUB_TOKEN, GITHUB_USER } from '@/constants';
+import Cookies from 'js-cookie';
+import { useState } from 'react';
 import CommitActivities from './_components/commit-activities';
+import GitCommitForm from './_components/git-commit-form';
+import GitCredentialsForm from './_components/git-credentials-form';
 
 const Dashboard = () => {
-  const [showCredentialsForm, setShowCredentialsForm] = useState(false);
+  const [showCredentialsForm, setShowCredentialsForm] = useState(
+    Cookies.get(GITHUB_TOKEN) && Cookies.get(GITHUB_USER) ? false : true
+  );
   const [showAddCommitForm, setShowAddCommitForm] = useState(false);
+  const [isEditingCredentials, setIsEditingCredentials] = useState(false);
 
   return (
     <div className="mx-2 md:mx-8 md:space-y-6">
       {showCredentialsForm ? (
         <div className="flex justify-center mt-4 md:mt-8">
-          <GitCredentialsForm />
+          <GitCredentialsForm
+            setShowCredentialsForm={setShowCredentialsForm}
+            isEdit={isEditingCredentials}
+            setIsEditingCredentials={setIsEditingCredentials}
+          />
         </div>
       ) : (
         <>
@@ -27,7 +36,11 @@ const Dashboard = () => {
                 onClick={() => setShowAddCommitForm(!showAddCommitForm)}>
                 {showAddCommitForm ? 'Show Activities' : 'Add new commit'}
               </Button>
-              <Button size="sm" onClick={() => setShowCredentialsForm(true)}>
+              <Button
+                size="sm"
+                onClick={() => {
+                  setIsEditingCredentials(true), setShowCredentialsForm(true);
+                }}>
                 Update Github credentials
               </Button>
             </div>

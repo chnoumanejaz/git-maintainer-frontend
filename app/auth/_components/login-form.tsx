@@ -116,7 +116,7 @@ const LoginForm: React.FC = () => {
               )}
             />
             <Button type="submit" className="w-full" disabled={isLoading}>
-              Login
+              {isLoading ? 'Logging in...' : 'Login'}
             </Button>
           </form>
         </Form>

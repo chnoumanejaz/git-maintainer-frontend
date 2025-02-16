@@ -17,32 +17,75 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { GITHUB_TOKEN, GITHUB_USER } from '@/constants';
+import api from '@/lib/axios';
+import { formatErrorMessage } from '@/lib/utils';
 import {
   gitCredentialsFormSchema,
   gitCredentialsFormSchemaType,
 } from '@/schemas/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
-import React from 'react';
+import { AxiosError } from 'axios';
+import Cookies from 'js-cookie';
+import React, { Dispatch, SetStateAction, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
-const GitCredentialsForm: React.FC = () => {
+type props = {
+  isEdit?: boolean;
+  setShowCredentialsForm: Dispatch<SetStateAction<boolean>>;
+  setIsEditingCredentials: Dispatch<SetStateAction<boolean>>;
+};
+const GitCredentialsForm = ({
+  isEdit,
+  setShowCredentialsForm,
+  setIsEditingCredentials,
+}: props) => {
+  const [isLoading, setIsLoading] = useState(false);
+
   const form = useForm<gitCredentialsFormSchemaType>({
     resolver: zodResolver(gitCredentialsFormSchema),
     defaultValues: {
-      github_username: '',
-      github_token: '',
+      github_username: Cookies.get(GITHUB_USER) || '',
+      github_token: Cookies.get(GITHUB_TOKEN) || '',
     },
   });
 
-  function onSubmit(values: gitCredentialsFormSchemaType) {
+  async function onSubmit(values: gitCredentialsFormSchemaType) {
     console.log(values);
+    try {
+      setIsLoading(true);
+      let response = null;
+      if (isEdit) {
+        response = await api.patch('/save_github/', values);
+      } else {
+        response = await api.post('/save_github/', values);
+      }
+      Cookies.set(GITHUB_USER, values.github_username, {
+        secure: true,
+      });
+      Cookies.set(GITHUB_TOKEN, values.github_token, {
+        secure: true,
+      });
+      setShowCredentialsForm(false);
+      toast.success(response.data.message);
+    } catch (error) {
+      console.error(error);
+      if (error instanceof AxiosError) {
+        toast.error(formatErrorMessage(error.response?.data));
+      } else {
+        toast.error('An unknown error occurred.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
     <Card className="w-full max-w-md rounded-lg p-2 md:p-8 shadow-md m-3 md:m-0">
       <CardHeader>
         <CardTitle className="md:mb-6 text-lg md:text-2xl font-semibold text-center">
-          Configure Github Credentials
+          {isEdit ? 'Update' : 'Configure'} Github Credentials
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -58,6 +101,7 @@ const GitCredentialsForm: React.FC = () => {
                     <Input
                       placeholder="Enter your Github username"
                       {...field}
+                      disabled={isLoading}
                     />
                   </FormControl>
                   <FormDescription className="text-xs text-gray-500">
@@ -75,7 +119,11 @@ const GitCredentialsForm: React.FC = () => {
                 <FormItem>
                   <FormLabel>Github Token</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter your Github token" {...field} />
+                    <Input
+                      placeholder="Enter your Github token"
+                      {...field}
+                      disabled={isLoading}
+                    />
                   </FormControl>
                   <FormDescription className="text-xs text-gray-500">
                     You can generate the token by visiting the{' '}
@@ -92,9 +140,27 @@ const GitCredentialsForm: React.FC = () => {
               )}
             />
 
-            <Button type="submit" className="w-full">
-              Link the Account
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isEdit
+                ? isLoading
+                  ? 'Updating...'
+                  : 'Update Linked Account'
+                : isLoading
+                ? 'Linking...'
+                : 'Link the Account'}
             </Button>
+            {isEdit && (
+              <Button
+                type="reset"
+                variant="secondary"
+                className="w-full"
+                disabled={isLoading}
+                onClick={() => {
+                  setIsEditingCredentials(false), setShowCredentialsForm(false);
+                }}>
+                Cancle
+              </Button>
+            )}
           </form>
         </Form>
       </CardContent>
