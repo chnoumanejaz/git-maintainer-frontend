@@ -12,12 +12,20 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import api from '@/lib/axios';
+import { formatErrorMessage } from '@/lib/utils';
 import { gitCommitFormSchema, gitCommitFormSchemaType } from '@/schemas/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
-import React from 'react';
+import { AxiosError } from 'axios';
+import { Dispatch, SetStateAction, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
-const GitCommitForm: React.FC = () => {
+type props = {
+  setShowAddCommitForm: Dispatch<SetStateAction<boolean>>;
+};
+const GitCommitForm = ({ setShowAddCommitForm }: props) => {
+  const [isLoading, setIsLoading] = useState(false);
   const form = useForm<gitCommitFormSchemaType>({
     resolver: zodResolver(gitCommitFormSchema),
     defaultValues: {
@@ -27,8 +35,24 @@ const GitCommitForm: React.FC = () => {
     },
   });
 
-  function onSubmit(values: gitCommitFormSchemaType) {
+  async function onSubmit(values: gitCommitFormSchemaType) {
     console.log(values);
+    try {
+      setIsLoading(true);
+      const response = await api.post('/make_commits/', values);
+      toast.success(response.data.message);
+      form.reset();
+      setShowAddCommitForm(false);
+    } catch (error) {
+      console.error(error);
+      if (error instanceof AxiosError) {
+        toast.error(formatErrorMessage(error.response?.data));
+      } else {
+        toast.error('An unknown error occurred.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -51,6 +75,7 @@ const GitCommitForm: React.FC = () => {
                     <Input
                       placeholder="Enter your Github repository name"
                       {...field}
+                      disabled={isLoading}
                     />
                   </FormControl>
                   <FormDescription className="text-xs text-gray-500">
@@ -72,6 +97,7 @@ const GitCommitForm: React.FC = () => {
                       placeholder="Enter number of commits"
                       type="number"
                       {...field}
+                      disabled={isLoading}
                     />
                   </FormControl>
                   <FormDescription className="text-xs text-gray-500">
@@ -81,7 +107,6 @@ const GitCommitForm: React.FC = () => {
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="user_input"
@@ -93,6 +118,7 @@ const GitCommitForm: React.FC = () => {
                       placeholder="Type your message here."
                       rows={5}
                       {...field}
+                      disabled={isLoading}
                     />
                   </FormControl>
                   <FormDescription className="text-xs text-gray-500">
@@ -104,8 +130,13 @@ const GitCommitForm: React.FC = () => {
               )}
             />
 
-            <Button type="submit" className="w-full">
-              Add commit(s)
+            {isLoading && (
+              <p className="text-sm text-blue-600 text-center">
+                This may take few seconds. Please be patient.
+              </p>
+            )}
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? 'Adding...' : 'Add commit(s)'}
             </Button>
           </form>
         </Form>

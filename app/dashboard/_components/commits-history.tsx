@@ -63,7 +63,8 @@ const CommitsHistory = () => {
       {showAlert ? (
         <p className="text-red-600 text-sm">
           Multiple commit failures detected today. Please verify your GitHub
-          credentials and ensure you have write access.
+          credentials and ensure you have write access. Additionally, make sure
+          you are trying to do commits related to programing tasks. Try again.
         </p>
       ) : (
         <p className="text-gray-600 text-sm">

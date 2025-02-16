@@ -46,7 +46,11 @@ const Dashboard = () => {
             </div>
           </div>
           <div className="flex justify-center mt-4 md:mt-8">
-            {showAddCommitForm ? <GitCommitForm /> : <CommitsHistory />}
+            {showAddCommitForm ? (
+              <GitCommitForm setShowAddCommitForm={setShowAddCommitForm} />
+            ) : (
+              <CommitsHistory />
+            )}
           </div>
         </>
       )}
