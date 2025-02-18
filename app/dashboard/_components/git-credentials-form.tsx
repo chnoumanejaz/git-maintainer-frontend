@@ -18,16 +18,14 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { GITHUB_TOKEN, GITHUB_USER } from '@/constants';
-import api from '@/lib/axios';
-import { formatErrorMessage } from '@/lib/utils';
+import api, { showApiError } from '@/lib/axios';
+import { getCookie, setCookie } from '@/lib/utils';
 import {
   gitCredentialsFormSchema,
   gitCredentialsFormSchemaType,
 } from '@/schemas/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AxiosError } from 'axios';
-import Cookies from 'js-cookie';
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -46,8 +44,8 @@ const GitCredentialsForm = ({
   const form = useForm<gitCredentialsFormSchemaType>({
     resolver: zodResolver(gitCredentialsFormSchema),
     defaultValues: {
-      github_username: Cookies.get(GITHUB_USER) || '',
-      github_token: Cookies.get(GITHUB_TOKEN) || '',
+      github_username: getCookie(GITHUB_USER) || '',
+      github_token: getCookie(GITHUB_TOKEN) || '',
     },
   });
 
@@ -55,27 +53,19 @@ const GitCredentialsForm = ({
     console.log(values);
     try {
       setIsLoading(true);
-      let response = null;
-      if (isEdit) {
-        response = await api.patch('/save_github/', values);
-      } else {
-        response = await api.post('/save_github/', values);
-      }
-      Cookies.set(GITHUB_USER, values.github_username, {
-        secure: true,
-      });
-      Cookies.set(GITHUB_TOKEN, values.github_token, {
-        secure: true,
-      });
+      const response = isEdit
+        ? await api.patch('/save_github/', values)
+        : await api.post('/save_github/', values);
+
+      setCookie(
+        [GITHUB_USER, GITHUB_TOKEN],
+        [values.github_username, values.github_token]
+      );
+
       setShowCredentialsForm(false);
       toast.success(response.data.message);
     } catch (error) {
-      console.error(error);
-      if (error instanceof AxiosError) {
-        toast.error(formatErrorMessage(error.response?.data));
-      } else {
-        toast.error('An unknown error occurred.');
-      }
+      showApiError(error);
     } finally {
       setIsLoading(false);
     }

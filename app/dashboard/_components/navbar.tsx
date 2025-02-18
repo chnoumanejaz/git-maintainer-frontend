@@ -1,7 +1,7 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { ACCESS_TOKEN, REFRESH_TOKEN } from '@/constants';
-import Cookies from 'js-cookie';
+import { removeCookie } from '@/lib/utils';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -9,8 +9,7 @@ const DashboardNavBar = () => {
   const router = useRouter();
 
   const logout = () => {
-    Cookies.remove(ACCESS_TOKEN);
-    Cookies.remove(REFRESH_TOKEN);
+    removeCookie([ACCESS_TOKEN, REFRESH_TOKEN]);
     router.push('/auth/login');
   };
 

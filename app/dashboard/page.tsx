@@ -1,7 +1,7 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { GITHUB_TOKEN, GITHUB_USER } from '@/constants';
-import Cookies from 'js-cookie';
+import { getCookie } from '@/lib/utils';
 import { useState } from 'react';
 import CommitsHistory from './_components/commits-history';
 import GitCommitForm from './_components/git-commit-form';
@@ -9,7 +9,7 @@ import GitCredentialsForm from './_components/git-credentials-form';
 
 const Dashboard = () => {
   const [showCredentialsForm, setShowCredentialsForm] = useState(
-    Cookies.get(GITHUB_TOKEN) && Cookies.get(GITHUB_USER) ? false : true
+    getCookie(GITHUB_TOKEN) && getCookie(GITHUB_USER) ? false : true
   );
   const [showAddCommitForm, setShowAddCommitForm] = useState(false);
   const [isEditingCredentials, setIsEditingCredentials] = useState(false);

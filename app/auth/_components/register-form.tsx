@@ -17,10 +17,10 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { formatErrorMessage } from '@/lib/utils';
+import { showApiError } from '@/lib/axios';
 import { registerFormSchema, registerFormSchemaType } from '@/schemas/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
@@ -54,12 +54,7 @@ const RegisterForm: React.FC = () => {
       );
       router.push('/auth/login');
     } catch (error) {
-      console.error(error);
-      if (error instanceof AxiosError) {
-        toast.error(formatErrorMessage(error.response?.data));
-      } else {
-        toast.error('An unknown error occurred.');
-      }
+      showApiError(error);
     } finally {
       setIsLoading(false);
     }

@@ -12,11 +12,9 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import api from '@/lib/axios';
-import { formatErrorMessage } from '@/lib/utils';
+import api, { showApiError } from '@/lib/axios';
 import { gitCommitFormSchema, gitCommitFormSchemaType } from '@/schemas/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AxiosError } from 'axios';
 import { Dispatch, SetStateAction, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -44,12 +42,7 @@ const GitCommitForm = ({ setShowAddCommitForm }: props) => {
       form.reset();
       setShowAddCommitForm(false);
     } catch (error) {
-      console.error(error);
-      if (error instanceof AxiosError) {
-        toast.error(formatErrorMessage(error.response?.data));
-      } else {
-        toast.error('An unknown error occurred.');
-      }
+      showApiError(error);
     } finally {
       setIsLoading(false);
     }
